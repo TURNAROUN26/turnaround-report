@@ -1,6 +1,4 @@
-[index.html](https://github.com/user-attachments/files/26665204/index.html)
-# turnaround-report
-TurnAround Report - Planta PERU LNG
+[index.html](https://github.com/user-attachments/files/26665934/index.html)
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -277,12 +275,25 @@ TurnAround Report - Planta PERU LNG
             font-size: 0.75rem;
             color: #7d5d00;
         }
+        .github-badge {
+            background: #24292e;
+            color: white;
+            border-radius: 40px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>📊 TurnAround Report - Planta PERU LNG</h1>
-    <div class="sub">📌 Curvas S | Notas por Proyecto | Personal & HSE <span class="auto-sync-badge">⚡ Sincronización automática c/15 min</span></div>
+    <div class="sub">📌 Curvas S | Notas por Proyecto | Personal & HSE 
+        <span class="auto-sync-badge">⚡ Sincronización automática c/15 min</span>
+        <span class="github-badge">🐙 GitHub Pages</span>
+    </div>
     
     <div class="sync-bar">
         <span id="syncStatus">🔄 Conectando con la nube...</span>
@@ -410,18 +421,21 @@ TurnAround Report - Planta PERU LNG
     <!-- SECCIÓN QR AL FINAL DEL REPORTE -->
     <div class="qr-container">
         <h3>🔗 QR para Visualización del Reporte</h3>
-        <p style="font-size:0.8rem; color:#64748b;">Genera un código QR con la URL actual para compartir la visualización del reporte.</p>
+        <p style="font-size:0.8rem; color:#64748b;">Escanea el código QR desde tu celular para acceder a este reporte en vivo.</p>
         <div class="qr-wrapper" id="qrCodeDiv">
-            <div style="padding: 20px; color: #64748b;">⬅️ Haz clic en "Generar QR"</div>
+            <div style="padding: 20px; color: #64748b;">⬅️ Generando QR...</div>
         </div>
         <div>
-            <button id="btnGenerarQR" class="btn-qr">📱 Generar QR del Reporte</button>
+            <button id="btnGenerarQR" class="btn-qr">📱 Regenerar QR</button>
             <button id="btnCopiarURL" class="btn-qr" style="background-color:#2980b9; margin-left:10px;">📋 Copiar URL</button>
         </div>
-        <div class="qr-url-display" id="qrUrlDisplay"></div>
+        <div class="qr-url-display" id="qrUrlDisplay">
+            🔗 Cargando URL...
+        </div>
         <div class="qr-note">
             📌 <strong>Instrucciones:</strong> Escanea el código QR con la cámara de tu celular. Se abrirá automáticamente el reporte completo.<br>
-            💡 Si el QR no funciona, copia la URL de arriba y pégala en el navegador de tu celular.
+            💡 Si el QR no funciona, copia la URL de arriba y pégala en el navegador de tu celular.<br>
+            🐙 <strong>URL pública:</strong> <span id="publicUrlPlaceholder">https://TU-USUARIO.github.io/turnaround-report/</span>
         </div>
     </div>
 
@@ -431,6 +445,29 @@ TurnAround Report - Planta PERU LNG
 </div>
 
 <script>
+    // ========== DETECCIÓN AUTOMÁTICA DE URL PARA GITHUB PAGES ==========
+    function getBaseUrl() {
+        let url = window.location.href;
+        // Eliminar parámetros y fragmentos
+        url = url.split('?')[0].split('#')[0];
+        // Asegurar que termine con /
+        if (!url.endsWith('/')) {
+            url = url.substring(0, url.lastIndexOf('/') + 1);
+        }
+        return url;
+    }
+    
+    // Actualizar el placeholder de la URL pública
+    const currentUrl = getBaseUrl();
+    const publicUrlSpan = document.getElementById('publicUrlPlaceholder');
+    if (publicUrlSpan && currentUrl && !currentUrl.includes('file://') && !currentUrl.includes('localhost')) {
+        publicUrlSpan.textContent = currentUrl;
+        publicUrlSpan.style.color = '#2e7d32';
+        publicUrlSpan.style.fontWeight = 'bold';
+    } else if (publicUrlSpan) {
+        publicUrlSpan.innerHTML = '⚠️ Reemplaza TU-USUARIO con tu usuario de GitHub';
+    }
+    
     // ========== CONFIGURACIÓN JSONBIN ==========
     const JSONBIN_BIN_ID = "69d2a901856a68218900cf05";
     const JSONBIN_API_KEY = "$2a$10$PtMTY.RZC7wtT0GEsBvc9uMPQ3uWmg9sDTqZCgSgB.vAGILz3NsCm";
@@ -641,12 +678,15 @@ TurnAround Report - Planta PERU LNG
     async function guardarComentariosGeneralesHandler(fechaIdx) { const key = fechaIdx.toString(); const texto = document.getElementById("comentariosGenerales").value; comentariosGenerales[key] = texto; guardarComentariosGeneralesLocal(); await guardarEnNubeConMerge(); }
     function actualizarTodo(){ actualizarGraficosConLinea(); actualizarSemaforoPorFecha(); actualizarSelectoresFechas(); actualizarMosaicos(); actualizarCategoriasProyecto(); cargarComentarioUI(); }
     
-    // ========== FUNCIONES QR CORREGIDAS ==========
+    // ========== FUNCIÓN QR CORREGIDA PARA GITHUB PAGES ==========
     let qrCodeInstance = null;
     
     function generarQR() {
-        // Obtener la URL completa actual (esta es la URL del HTML)
-        const urlActual = window.location.href;
+        // Obtener la URL completa actual (funciona en GitHub Pages)
+        let urlActual = window.location.href;
+        
+        // Limpiar parámetros innecesarios
+        urlActual = urlActual.split('?')[0].split('#')[0];
         
         // Mostrar la URL en el div para referencia
         const urlDisplay = document.getElementById("qrUrlDisplay");
@@ -654,24 +694,35 @@ TurnAround Report - Planta PERU LNG
             urlDisplay.innerHTML = `🔗 URL del reporte: <a href="${urlActual}" target="_blank">${urlActual.length > 80 ? urlActual.substring(0, 80) + '...' : urlActual}</a>`;
         }
         
+        // Actualizar el placeholder si es necesario
+        if (publicUrlSpan && urlActual && !urlActual.includes('file://') && !urlActual.includes('localhost')) {
+            publicUrlSpan.textContent = urlActual;
+            publicUrlSpan.style.color = '#2e7d32';
+        }
+        
         // Limpiar el contenedor del QR
         const qrDiv = document.getElementById("qrCodeDiv");
         qrDiv.innerHTML = "";
         
         try {
+            // Verificar que la librería QRCode esté disponible
+            if (typeof QRCode === 'undefined') {
+                throw new Error('Librería QR no cargada. Recarga la página.');
+            }
+            
             // Crear el QR usando la librería QRCode.js con la URL completa
             qrCodeInstance = new QRCode(qrDiv, {
                 text: urlActual,
-                width: 220,
-                height: 220,
+                width: 250,
+                height: 250,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
             
-            // Mensaje de éxito
+            // Agregar mensaje de éxito
             const successMsg = document.createElement("div");
-            successMsg.style.cssText = "margin-top: 10px; font-size: 0.75rem; color: #27ae60;";
+            successMsg.style.cssText = "margin-top: 15px; font-size: 0.8rem; color: #27ae60; font-weight: bold;";
             successMsg.innerHTML = "✅ QR generado correctamente. Escanea con tu celular para abrir el reporte.";
             qrDiv.appendChild(successMsg);
             
@@ -685,7 +736,8 @@ TurnAround Report - Planta PERU LNG
     }
     
     function copiarURL() {
-        const url = window.location.href;
+        let url = window.location.href;
+        url = url.split('?')[0].split('#')[0];
         navigator.clipboard.writeText(url).then(() => {
             const btn = document.getElementById("btnCopiarURL");
             const textoOriginal = btn.textContent;
@@ -698,14 +750,9 @@ TurnAround Report - Planta PERU LNG
         });
     }
     
-    // Eventos
+    // ========== EVENTOS ==========
     document.getElementById("btnGenerarQR").addEventListener("click", generarQR);
     document.getElementById("btnCopiarURL").addEventListener("click", copiarURL);
-    
-    // Generar el QR automáticamente al cargar la página
-    window.addEventListener("load", function() {
-        setTimeout(generarQR, 500);
-    });
     
     document.getElementById("btnCargarExcel").addEventListener("click", async () => { const fileInput = document.getElementById("excelUpload"); if (!fileInput.files.length) { document.getElementById("excelStatus").innerHTML = "❌ Selecciona archivo."; return; } const file = fileInput.files[0]; const statusSpan = document.getElementById("excelStatus"); statusSpan.innerHTML = "📂 Procesando..."; const reader = new FileReader(); reader.onload = async (e) => { try { const workbook = XLSX.read(e.target.result, { type: "array" }); let sheetName = workbook.SheetNames.find(n => n.toLowerCase().includes("curva") || n.toLowerCase().includes("planned")); if (!sheetName) sheetName = workbook.SheetNames[0]; const sheet = workbook.Sheets[sheetName]; const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" }); if (!rows || rows.length < 2) throw new Error("Datos insuficientes"); for (let rowIdx = 1; rowIdx < rows.length; rowIdx++) { const row = rows[rowIdx]; if (!row || row.length < 2) continue; const tipo = row[1]?.toString().trim().toUpperCase(); let codigo = row[0]?.toString().trim(); if (!codigo || !codigosProyecto.includes(codigo)) continue; if (tipo === "PLANNED") for (let i=0; i<Math.min(rows[0].length-2, fechasCorte.length); i++) { let val = parseFloat(row[2+i]); if (!isNaN(val) && val>=0 && val<=1) planes[codigo][i] = val; } else if (tipo === "ACTUAL") for (let i=0; i<Math.min(rows[0].length-2, fechasCorte.length); i++) { let val = parseFloat(row[2+i]); if (!isNaN(val) && val>=0 && val<=1) realData[codigo][i] = val; } } saveRealesToLocal(); savePlanesToLocal(); await reemplazarPlanRealEnNube(); statusSpan.innerHTML = "✅ Excel cargado y reemplazado."; actualizarTodo(); } catch(err) { statusSpan.innerHTML = `❌ Error: ${err.message}`; } }; reader.readAsArrayBuffer(file); });
     document.getElementById("btnGuardarComentario").addEventListener("click",async()=>{ const proyecto=window.proyectoSeleccionado; const fechaIdx=currentFechaIdx; const categoria=window.categoriaSeleccionada; const texto=document.getElementById("comentarioTexto").value; if(!proyecto||!categoria) return; await guardarComentario(proyecto,fechaIdx,categoria,texto); });
@@ -718,6 +765,7 @@ TurnAround Report - Planta PERU LNG
     document.getElementById("btnGuardarComentariosGenerales").addEventListener("click",()=>{ guardarComentariosGeneralesHandler(currentFechaIdx); });
     document.getElementById("selectProyectoGrafica").addEventListener("change",()=>actualizarGraficosConLinea());
     
+    // ========== INICIALIZACIÓN ==========
     cargarPlanesDefault();
     loadFromLocal();
     initCharts();
@@ -728,6 +776,11 @@ TurnAround Report - Planta PERU LNG
     cargarComentarioUI();
     cargarDesdeNube();
     iniciarAutoSyncConTimer();
+    
+    // Generar QR al cargar la página
+    window.addEventListener("load", function() {
+        setTimeout(generarQR, 800);
+    });
 </script>
 </body>
 </html>
